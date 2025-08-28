@@ -1,5 +1,6 @@
 import { primaryBlack } from '@/assets/utils/colors';
 import { truncateSentenceSafe } from '@/assets/utils/functions';
+import MainTitle from '@/components/main_title';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { BlurView } from 'expo-blur';
 import { Link } from 'expo-router';
@@ -58,7 +59,7 @@ const renderItem = ({item}: {item: TestDataType}) => {
 export default function FlirtPage() {
     return (
         <View className='flex-1 p-5'>
-            <Text className='mb-2 text-5xl font-agathomedium'>Flirts</Text>
+            <MainTitle>Flirts</MainTitle>
             <FlatList className='pt-4' data={TEST_DATA} renderItem={renderItem} />
         </View>
     )
