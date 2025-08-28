@@ -46,7 +46,7 @@ const renderItem = ({item}: {item: TestDataType}) => {
                     </View>
                     {unread_messages !== 0 && (
                         <View className='w-8 h-8 rounded-full flex justify-center items-center bg-primaryColor'>
-                            <Text className='font-agathobold text-[20px] text-primaryBlack'>{unread_messages}</Text>
+                            <Text className='font-agathobold text-[20px] text-white'>{unread_messages}</Text>
                         </View>
                     )}
                 </View>

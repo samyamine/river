@@ -1,9 +1,10 @@
-import { white } from '@/assets/utils/colors';
+import { primaryBlack, white } from '@/assets/utils/colors';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from "expo-blur";
 import { Link, router } from "expo-router";
-import { FlatList, Image, Pressable, Text, View } from "react-native";
+import { useState } from 'react';
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 type TestDataType = {sender: string, message: string, timestamp: number}
 
@@ -35,7 +36,7 @@ const renderItem = ({item}: {item: TestDataType}) => {
     }
     else {
         return (
-            <View className='max-w-[66%] p-3 mb-2 gap-2 rounded-xl rounded-br-none bg-white'>
+            <View className='max-w-[66%] p-3 mb-2 gap-2 rounded-xl rounded-bl-none bg-gray-50'>
                 <Text className='text-lg leading-6 text-primaryBlack'>{item.message}</Text>
                 <Text className='text-right text-sm text-primaryBlack'>{date}</Text>
             </View>
@@ -44,8 +45,17 @@ const renderItem = ({item}: {item: TestDataType}) => {
 };
 
 export default function ChatPage() {
+    const [text, setText] = useState("");
+    const [inputHeight, setInputHeight] = useState(40);
+
+    const MIN_INPUT_HEIGHT = 40;
+    const MAX_INPUT_HEIGHT = 120;
+
     return (
-        <View className="flex-1">
+        <KeyboardAvoidingView
+            className="flex-1"
+            behavior={Platform.OS === "ios" ? "padding" : "height"} // "padding" is best for iOS, "height" for Android
+            keyboardVerticalOffset={20}>
             {/* FIXME: Header */}
             <View className="w-full px-5 pt-2 pb-3">
                 <View className="w-full flex-row justify-between items-center gap-4">
@@ -70,15 +80,44 @@ export default function ChatPage() {
             {/* <Image source={{ uri: "https://i.pinimg.com/736x/6b/16/2d/6b162dccddf34dbc4b0040d911d3046f.jpg" }} className="w-24 h-24" /> */}
 
             {/* FIXME: Content */}
-            <View className='flex-1 bg-primaryGray-50'>
-                <FlatList data={TEST_DATA} renderItem={renderItem} className='px-5 pt-5' />
+            <View className='flex-1 bg-primaryGray-100'>
+                <FlatList inverted data={TEST_DATA.reverse()} renderItem={renderItem} contentContainerStyle={{ paddingTop: 10, paddingBottom: 10, paddingHorizontal: 20 }} />
             </View>
 
 
             {/* FIXME: Footer */}
-            <View className='w-full h-20 bg-white'>
-
+            <View className='w-full max-w-full min-h-20 px-5 pt-3 pb-2 flex-row justify-between items-center gap-4 bg-white'>
+                <Pressable className='w-12 h-12 flex justify-center items-center rounded-full bg-primaryColor'>
+                    <Ionicons name="sparkles" size={18} color={white} />
+                </Pressable>
+                <TextInput 
+                    className='px-3 py-2 w-full h-12 shrink rounded-full bg-white border border-primaryBlack'
+                    // style={{ height: Math.min(inputHeight, 120) }}
+                    placeholderTextColor={primaryBlack} 
+                    onChangeText={setText} 
+                    value={text} 
+                    placeholder='Ecris ton message ici...'
+                    textAlignVertical="center"
+                    scrollEnabled={true}
+                    multiline
+                    
+                    onContentSizeChange={(e) => setInputHeight(e.nativeEvent.contentSize.height)} />
+                <Pressable className='w-12 h-12 flex justify-center items-center rounded-full bg-primaryBlack'>
+                    <Ionicons name="send" size={18} color={white} />
+                </Pressable>
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 }
+
+const styles = StyleSheet.create({
+  textInput: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    textAlignVertical: "top", // important pour Android
+  },
+});
