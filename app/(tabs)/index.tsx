@@ -1,9 +1,12 @@
+import { primaryColor } from '@/assets/utils/colors';
 import { EDirection } from '@/assets/utils/enums';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 
 const URIS: string[] = [
     "https://i.pinimg.com/474x/67/62/54/6762544a2e1aaad8f58f8e187f6883c4.jpg",
@@ -24,9 +27,23 @@ export default function RecommendationPage() {
 
         if (direction == EDirection.Left) {
             newIndex = imageIndex == 0 ? imageIndex : imageIndex - 1;
+            
+            if (Platform.OS === "ios") {
+                imageIndex == 0 ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success) : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+            else {
+                imageIndex == 0 ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error) : Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Clock_Tick);
+            }
         }
         else if (direction == EDirection.Right) {
             newIndex = imageIndex == URIS.length - 1 ? imageIndex : imageIndex + 1;
+
+            if (Platform.OS === "ios") {
+                imageIndex == URIS.length - 1 ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success) : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+            else {
+                imageIndex == URIS.length - 1 ? Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error) : Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Clock_Tick);
+            }
         }
 
         setImageIndex(newIndex);
@@ -43,9 +60,9 @@ export default function RecommendationPage() {
                 <View className={`w-2 h-2 rounded-full bg-black opacity-30`}></View>
             </View>
 
-            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120, gap: 12 }} className='px-5'>
+            <ScrollView showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 150, gap: 12 }} className='px-5'>
                 {/* Profile pictures */}
-                <View className='w-full h-[300px] rounded-3xl overflow-hidden flex-row bg-orange-300'>
+                <View className='w-full h-[320px] rounded-3xl overflow-hidden flex-row bg-orange-300'>
                     <Image source={{ uri: URIS[imageIndex] }} className='absolute w-full h-full' resizeMode='cover' />
                     <BlurView intensity={60} tint='light' className="absolute w-full h-full" />
 
@@ -78,8 +95,14 @@ export default function RecommendationPage() {
                         </View>
                     </View>
 
-                    <Pressable className="w-1/2 h-full" onPress={() => updateImageIndex(EDirection.Left)}></Pressable>
-                    <Pressable className="w-1/2 h-full" onPress={() => updateImageIndex(EDirection.Right)}></Pressable>
+                    <Pressable className="w-1/2 h-full" onPress={() => {
+                        (Platform.OS === "ios") ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Clock_Tick);
+                        updateImageIndex(EDirection.Left)
+                    }}></Pressable>
+                    <Pressable className="w-1/2 h-full" onPress={() => {
+                        (Platform.OS === "ios") ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Clock_Tick);
+                        updateImageIndex(EDirection.Right)
+                    }}></Pressable>
                 </View>
 
 
@@ -232,6 +255,16 @@ export default function RecommendationPage() {
                     </View>
                 </View>
             </ScrollView>
+
+            {/* FIXME: Buttons */}
+            <View className='absolute bottom-16 w-full flex-row items-center justify-center gap-7'>
+                <Pressable className='w-[72px] h-[72px] rounded-full shadow-lg flex items-center justify-center bg-white'>
+                    <FontAwesome name='times' size={36} color={primaryColor} />
+                </Pressable>
+                <Pressable className='w-[72px] h-[72px] rounded-full shadow-lg flex items-center justify-center' style={{backgroundColor: primaryColor}}>
+                    <FontAwesome name='heart' size={36} color="#fff" />
+                </Pressable>
+            </View>
         </LinearGradient>
     );
 }
