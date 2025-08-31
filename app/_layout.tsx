@@ -6,7 +6,9 @@ import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./global.css";
 
-SplashScreen.preventAutoHideAsync()
+SplashScreen.preventAutoHideAsync();
+
+const IS_LOGGED_IN = false;
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -32,8 +34,14 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
-        <Stack.Screen name="concepts" options={{ headerShown: false }}/>
+        <Stack.Protected guard={IS_LOGGED_IN}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
+          <Stack.Screen name="concepts" options={{ headerShown: false }}/>
+        </Stack.Protected>
+
+        <Stack.Protected guard={!IS_LOGGED_IN}>
+          <Stack.Screen name="index" options={{ headerShown: false }}/>
+        </Stack.Protected>
       </Stack>
     </SafeAreaProvider>
 
