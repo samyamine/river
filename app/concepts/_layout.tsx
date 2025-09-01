@@ -5,6 +5,7 @@ export default function ConceptsLayout() {
     // <Stack screenOptions={{ contentStyle: { backgroundColor: '#F5F5F5' } }}>
     <Stack screenOptions={{ contentStyle: { backgroundColor: '#EBEBEB' } }}>
       <Stack.Screen name="profile" options={{ headerShown: false }}/>
+      <Stack.Screen name="verificationcode_page" options={{ headerShown: false }}/>
     </Stack>
   );
 }
