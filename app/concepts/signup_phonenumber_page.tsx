@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, Image, StyleSheet } from "react-native";
-import CountryFlag from "react-native-country-flag";
-import { Link, router } from "expo-router";
-import { useNavigation } from '@react-navigation/native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { primaryColor } from "@/assets/utils/colors";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { Image } from 'expo-image';
+import { router } from "expo-router";
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import CountryFlag from "react-native-country-flag";
 
 
 export default function SignUpPhonePage() {
