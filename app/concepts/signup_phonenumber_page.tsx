@@ -19,13 +19,18 @@ export default function SignUpPhonePage() {
         { code: "+61", label: "Australia", flag: <CountryFlag isoCode="au" size={10} /> },
         { code: "+49", label: "Germany", flag: <CountryFlag isoCode="de" size={10} /> },
         { code: "+33", label: "France", flag: <CountryFlag isoCode="fr" size={10} /> },
+        { code: "+212", label: "Maroc", flag: <CountryFlag isoCode="ma" size={10} /> },
+        { code: "+34", label: "Spain", flag: <CountryFlag isoCode="es" size={10} /> },
+        { code: "+31", label: "Netherlands", flag: <CountryFlag isoCode="nl" size={10} /> },
+        { code: "+32", label: "Belguim", flag: <CountryFlag isoCode="be" size={10} /> },
+        { code: "+41", label: "Switzerland", flag: <CountryFlag isoCode="ch" size={10} /> },
     ];
     const navigation = useNavigation();
-
+    
     return (
 
 
-        <View className="flex-1   mx-4 ">
+        <View className="flex-1  mx-4 ">
 
             <View>
                 <Pressable
@@ -69,7 +74,8 @@ export default function SignUpPhonePage() {
 
                 {/* Dropdown */}
                 {open && (
-                    <ScrollView className="mt-2 bg-white rounded-lg max-h-52 border border-gray-300">
+                    <ScrollView className="mt-2 bg-white rounded-lg max-h-52 border border-gray-300"
+                    >
                         {countries.map((country, index) => (
                             <Pressable
                                 key={index}
@@ -87,7 +93,7 @@ export default function SignUpPhonePage() {
 
                 <Pressable
                     onPress={() => router.push('/concepts/verificationcode_page')}
-                    className="mt-4 bg-primaryColor rounded-lg py-3 items-center ease-in-out hover:-translate-y-1 hover:scale-105 hover:bg-pink-700"
+                    className="mt-4 bg-primaryColor rounded-lg py-3 items-center"
                 >
                     <Text className="text-white font-semibold px-4">Send verification code</Text>
                 </Pressable>
