@@ -1,5 +1,6 @@
 import countriesDict from "@/assets/utils/countries.json";
 import BackButton from '@/components/back_button';
+import { router } from "expo-router";
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
@@ -32,29 +33,29 @@ export default function AuthPage() {
 
         return () => clearTimeout(timer);
     }, []);
-
+    const isPhoneComplete = phoneNumber.replace(/[^0-9]/g, '').length >= 10;
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}>
-            <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss(); setOpen(false)}} accessible={false}>
+            <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setOpen(false) }} accessible={false}>
                 <View className="w-full flex-1 p-5">
                     {/* FIXME: Return button */}
                     <View className='py-2 mb-5'>
                         <BackButton />
                     </View>
 
-                    <View className="w-full flex-grow justify-start items-center gap-6">
-                        <Text className='font-agathobold text-5xl'>Type your phone number</Text>
+                    <View className="w-full flex-grow justify-center  gap-6">
+                        <Text className='font-agathobold text-4xl'>Type your phone number</Text>
                         <Text className='text-primaryGray-400'>Please enter a valid phone number. We will send you a 4-digit code to verify your account</Text>
 
                         <View className="h-12 flex-row border border-primaryGray-200 rounded-lg overflow-hidden">
-                            <Pressable 
+                            <Pressable
                                 onPress={() => {
                                     Keyboard.dismiss();
                                     setOpen(!open);
                                 }}
                                 className="px-2 flex-row items-center gap-2 bg-primaryGray-200">
                                 <View className="rounded-sm overflow-hidden">
-                                    <CountryFlag isoCode={selectedCountry.iso} size={25} />
+                                    <CountryFlag isoCode={selectedCountry.iso} size={15} />
                                 </View>
                                 <Text>{selectedCountry.prefix}</Text>
                             </Pressable>
@@ -79,7 +80,7 @@ export default function AuthPage() {
                         {open && (
                             <ScrollView className="w-full rounded-lg max-h-52 border border-primaryGray-200 bg-white">
                                 {countries.map((country, index) => (
-                                    <Pressable 
+                                    <Pressable
                                         key={index}
                                         onPress={() => {
                                             setSelectedCountry(country);
@@ -88,7 +89,7 @@ export default function AuthPage() {
                                         }}
                                         className="px-3 py-2 flex-row items-center gap-3 border-b border-primaryGray-300">
                                         <View className="rounded-sm overflow-hidden">
-                                            <CountryFlag isoCode={country.iso} size={25} />
+                                            <CountryFlag isoCode={country.iso} size={18} />
                                         </View>
                                         <Text>{country.name} ({country.prefix})</Text>
                                     </Pressable>
@@ -96,16 +97,24 @@ export default function AuthPage() {
                             </ScrollView>
                         )}
 
-                        <Pressable 
+                        <Pressable
                             onPress={() => {
+                                if (!isPhoneComplete) return; 
                                 Keyboard.dismiss();
-                                console.log("FIXME");
-                            }} 
-                            className="w-full py-4 rounded-2xl bg-primaryColor">
-                            <Text className="text-center font-agathobold text-2xl text-white leading-6">
+                                router.push('/auth/OTPcode');
+                            }}
+                            disabled={!isPhoneComplete}
+                            className={`w-full py-4 rounded-2xl ${isPhoneComplete ? "bg-primaryColor" : "bg-gray-300"
+                                }`}
+                        >
+                            <Text
+                                className={`text-center font-agathobold text-2xl leading-6 ${isPhoneComplete ? "text-white" : "text-gray-500"
+                                    }`}
+                            >
                                 Send verification code
                             </Text>
                         </Pressable>
+
                     </View>
                 </View>
             </TouchableWithoutFeedback>
