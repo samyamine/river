@@ -1,15 +1,15 @@
-import { primaryColor } from "@/assets/utils/colors";
 import BackButton from "@/components/back_button";
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from "expo-router";
+import { Link } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 const RESEND_TIMEOUT = 60;
+
 export default function VerificationCodePage() {
     const [pin, setPin] = useState(["", "", "", ""]);
     const [seconds, setSeconds] = useState(RESEND_TIMEOUT);
     const [isFinished, setIsFinished] = useState(false);
+    const [focusedIndex, setFocusedIndex] = useState(0);
 
 
     const inputs = [
@@ -22,7 +22,6 @@ export default function VerificationCodePage() {
     // Countdown timer
     useEffect(() => {
         if (seconds === 0) {
-            setIsFinished(true);
             return;
         }
 
@@ -31,8 +30,8 @@ export default function VerificationCodePage() {
                 if (prev === 1) {
                     clearInterval(interval);
                     setIsFinished(true);
-                    return 0;
                 }
+
                 return prev - 1;
             });
         }, 1000);
@@ -62,59 +61,52 @@ export default function VerificationCodePage() {
     const isPinComplete = pin.every((digit) => digit !== "");
 
     return (
-        <View className="flex-1  bg-white py-12 px-8">
-            <View className="mt-12 pt-12">
-                <View className='py-2 mb-5'>
-                    <BackButton />
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View className="w-full flex-1 p-5">
+                    <View className='py-2 mb-5'>
+                        <BackButton />
+                    </View>
+
+                    <View className="w-full pt-12 flex-grow justify-start gap-6">
+                        <Text className="font-agathobold text-4xl">Enter your verification code</Text>
+                        <View className="flex-row gap-2 justify-center px-4">
+                            {pin.map((digit, index) => (
+                                <TextInput
+                                    key={index}
+                                    ref={inputs[index]}
+                                    value={digit}
+                                    onChangeText={(text) => handleChange(text, index)}
+                                    keyboardType="number-pad"
+                                    maxLength={1}
+                                    className={`w-16 h-24 text-center text-3xl border-2 ${focusedIndex === index ? "border-primaryColor" : "border-primaryGray-200"} rounded-xl`}
+                                />
+                            ))}
+                        </View>
+
+                        <Link href="/auth/sucess" asChild>
+                            <Pressable disabled={!isPinComplete} className={`w-full py-4 rounded-2xl ${isPinComplete ? "bg-primaryColor" : "bg-primaryGray-100"}`}>
+                                <Text className={`text-center font-agathobold text-2xl leading-6 ${isPinComplete ? "text-white" : "text-primaryGray-400"}`}>Continue</Text>
+                            </Pressable>
+                        </Link>
+
+                        <View className="w-full flex justify-center">
+                            {!isFinished ? (
+                                <Text className="text-primaryGray-400 text-center">
+                                    Resend available in{" "}
+                                    <Text className="text-primaryColor font-bold">
+                                        {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
+                                    </Text>
+                                </Text>
+                            ) : (
+                                <Pressable className="self-center">
+                                    <Text className="text-primaryColor text-center underline">Resend code</Text>
+                                </Pressable>
+                            )}
+                        </View>
+                    </View>
                 </View>
-            </View>
-            <Text className="text-3xl font-agathoblack  mb-4">Enter your verification Code</Text>
-            <View className="flex-row gap-2 mb-4 justify-center p-4">
-                {pin.map((digit, index) => (
-                    <TextInput
-                        key={index}
-                        ref={inputs[index]}
-                        value={digit}
-                        onChangeText={(text) => handleChange(text, index)}
-                        keyboardType="number-pad"
-                        maxLength={1}
-                        className="w-14 h-14 text-center text-xl border-2 border-primaryColor rounded-xl"
-                    />
-                ))}
-            </View>
-            {!isFinished ? (
-                <Text className="text-gray-500 mb-2">
-                    Resend available in{" "}
-                    <Text className="text-pink-600 font-bold">
-                        {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
-                    </Text>
-                </Text>
-            ) : (
-                <Text className="text-green-600 mb-2">
-                    You can resend the code now
-                </Text>
-            )}
-            <Pressable
-                onPress={() => router.push('/auth/sucess')}
-                disabled={!isPinComplete}
-                className={`mt-4 rounded-lg py-3 items-center ${isPinComplete ? "bg-primaryColor" : "bg-gray-300"
-                    }`}
-            >
-                <Text className="text-white text-lg font-agathobold px-4">Continue</Text>
-            </Pressable>
-            <Pressable
-                onPress={handleResend}
-                disabled={!isFinished}
-                className={`mt-3 px-6 py-3 rounded-lg  items-center ${isFinished ? "bg-primaryColor" : "bg-gray-300"
-                    }`}
-            >
-                <Text
-                    className={`text-white text-lg font-agathobold items-center ${!isFinished ? "text-opacity-50" : ""
-                        }`}
-                >
-                    Resend Code
-                </Text>
-            </Pressable>
-        </View>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     );
 }

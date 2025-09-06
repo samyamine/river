@@ -43,7 +43,7 @@ export default function AuthPage() {
                         <BackButton />
                     </View>
 
-                    <View className="w-full flex-grow justify-center  gap-6">
+                    <View className="w-full pt-12 flex-grow justify-start gap-6">
                         <Text className='font-agathobold text-4xl'>Type your phone number</Text>
                         <Text className='text-primaryGray-400'>Please enter a valid phone number. We will send you a 4-digit code to verify your account</Text>
 
@@ -104,17 +104,11 @@ export default function AuthPage() {
                                 router.push('/auth/OTPcode');
                             }}
                             disabled={!isPhoneComplete}
-                            className={`w-full py-4 rounded-2xl ${isPhoneComplete ? "bg-primaryColor" : "bg-gray-300"
-                                }`}
-                        >
-                            <Text
-                                className={`text-center font-agathobold text-2xl leading-6 ${isPhoneComplete ? "text-white" : "text-gray-500"
-                                    }`}
-                            >
+                            className={`w-full py-4 rounded-2xl ${isPhoneComplete ? "bg-primaryColor" : "bg-primaryGray-100"}`}>
+                            <Text className={`text-center font-agathobold text-2xl leading-6 ${isPhoneComplete ? "text-white" : "text-primaryGray-400"}`}>
                                 Send verification code
                             </Text>
                         </Pressable>
-
                     </View>
                 </View>
             </TouchableWithoutFeedback>
