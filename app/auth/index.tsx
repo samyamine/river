@@ -1,6 +1,6 @@
 import countriesDict from "@/assets/utils/countries.json";
 import BackButton from '@/components/back_button';
-import { router } from "expo-router";
+import { Link } from "expo-router";
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
@@ -20,11 +20,10 @@ const countries: ICountry[] = Object.values(countriesDict).map(country => ({
 
 export default function AuthPage() {
     const inputRef = useRef<TextInput>(null);
-    const dropdownRef = useRef<View>(null);
-    const selectorRef = useRef<TextInput>(null);
     const [open, setOpen] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [selectedCountry, setSelectedCountry] = useState(countries.find(country => country.iso === "fr") as ICountry);
+    const isPhoneComplete = phoneNumber.replace(/[^0-9]/g, '').length >= 10;
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -33,12 +32,11 @@ export default function AuthPage() {
 
         return () => clearTimeout(timer);
     }, []);
-    const isPhoneComplete = phoneNumber.replace(/[^0-9]/g, '').length >= 10;
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}>
             <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setOpen(false) }} accessible={false}>
                 <View className="w-full flex-1 p-5">
-                    {/* FIXME: Return button */}
                     <View className='py-2 mb-5'>
                         <BackButton />
                     </View>
@@ -97,18 +95,13 @@ export default function AuthPage() {
                             </ScrollView>
                         )}
 
-                        <Pressable
-                            onPress={() => {
-                                if (!isPhoneComplete) return; 
-                                Keyboard.dismiss();
-                                router.push('/auth/OTPcode');
-                            }}
-                            disabled={!isPhoneComplete}
-                            className={`w-full py-4 rounded-2xl ${isPhoneComplete ? "bg-primaryColor" : "bg-primaryGray-100"}`}>
-                            <Text className={`text-center font-agathobold text-2xl leading-6 ${isPhoneComplete ? "text-white" : "text-primaryGray-400"}`}>
-                                Send verification code
-                            </Text>
-                        </Pressable>
+                        <Link href="/auth/OTPcode" asChild>
+                            <Pressable 
+                                disabled={!isPhoneComplete} 
+                                className={`w-full py-4 rounded-2xl ${isPhoneComplete ? "bg-primaryColor" : "bg-primaryGray-100"}`}>
+                                <Text className={`text-center font-agathobold text-2xl leading-6 ${isPhoneComplete ? "text-white" : "text-primaryGray-400"}`}>Send verification code</Text>
+                            </Pressable>
+                        </Link>
                     </View>
                 </View>
             </TouchableWithoutFeedback>

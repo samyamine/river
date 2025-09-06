@@ -8,9 +8,8 @@ const RESEND_TIMEOUT = 60;
 export default function VerificationCodePage() {
     const [pin, setPin] = useState(["", "", "", ""]);
     const [seconds, setSeconds] = useState(RESEND_TIMEOUT);
-    const [isFinished, setIsFinished] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(0);
-
+    const isPinComplete = pin.every((digit) => digit !== "");
 
     const inputs = [
         useRef<TextInput>(null),
@@ -19,46 +18,50 @@ export default function VerificationCodePage() {
         useRef<TextInput>(null),
     ];
 
-    // Countdown timer
+    // Keyboard appearance
     useEffect(() => {
-        if (seconds === 0) {
-            return;
-        }
+        const timer = setTimeout(() => {
+            inputs[0].current?.focus();
+        }, 550);
 
-        const interval = setInterval(() => {
-            setSeconds((prev) => {
-                if (prev === 1) {
-                    clearInterval(interval);
-                    setIsFinished(true);
-                }
-
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
+        return () => clearTimeout(timer);
     }, []);
 
-    const handleChange = (text: string, index: number) => {
+
+    // Countdown timer
+    useEffect(() => {
+        let interval: number | null = null;
+
+        if (seconds > 0) {
+            interval = setInterval(() => {
+                setSeconds(prev => prev - 1);
+            }, 1000);
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [seconds]);
+
+    const handleChange = (text: string, index: number) => {        
         const newPin = [...pin];
         newPin[index] = text;
         setPin(newPin);
 
-        // Move to next input automatically
         if (text && index < inputs.length - 1) {
             inputs[index + 1].current?.focus();
-        } else if (!text && index > 0) {
-            inputs[index - 1].current?.focus();
+            setFocusedIndex(index + 1);
+        }
+        if (text && index === inputs.length - 1) {
+            Keyboard.dismiss();
         }
     };
 
     // Reset countdown
     const handleResend = () => {
+        console.log("FIXME");
         setSeconds(RESEND_TIMEOUT);
-        setIsFinished(false);
     };
-
-    const isPinComplete = pin.every((digit) => digit !== "");
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}>
@@ -77,6 +80,15 @@ export default function VerificationCodePage() {
                                     ref={inputs[index]}
                                     value={digit}
                                     onChangeText={(text) => handleChange(text, index)}
+                                    onKeyPress={({nativeEvent}) => {
+                                        if (nativeEvent.key == "Backspace" && !pin[index] && index > 0) {
+                                            inputs[index - 1].current?.focus();
+                                            const newPin = [...pin];
+                                            newPin[index - 1] = "";
+                                            setPin(newPin);
+                                            setFocusedIndex(index - 1);
+                                        }
+                                    }}
                                     keyboardType="number-pad"
                                     maxLength={1}
                                     className={`w-16 h-24 text-center text-3xl border-2 ${focusedIndex === index ? "border-primaryColor" : "border-primaryGray-200"} rounded-xl`}
@@ -91,7 +103,7 @@ export default function VerificationCodePage() {
                         </Link>
 
                         <View className="w-full flex justify-center">
-                            {!isFinished ? (
+                            {seconds !== 0 ? (
                                 <Text className="text-primaryGray-400 text-center">
                                     Resend available in{" "}
                                     <Text className="text-primaryColor font-bold">
@@ -99,7 +111,7 @@ export default function VerificationCodePage() {
                                     </Text>
                                 </Text>
                             ) : (
-                                <Pressable className="self-center">
+                                <Pressable className="self-center" onPress={handleResend}>
                                     <Text className="text-primaryColor text-center underline">Resend code</Text>
                                 </Pressable>
                             )}
