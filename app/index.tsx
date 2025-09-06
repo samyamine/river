@@ -30,9 +30,11 @@ export default function IndexPage() {
 
                 <View className='gap-3'>
                     <Text className='text-2xl font-bold font-agathobold text-white'>River is full of serious people in search of their true love.</Text>
-                    <Pressable className='w-full py-4 rounded-2xl bg-primaryColor'>
-                        <Text className='text-center font-agathobold text-2xl text-white leading-6'>Continue with phone number</Text>
-                    </Pressable>
+                    <Link href="/auth" asChild>
+                        <Pressable className="w-full py-4 rounded-2xl bg-primaryColor">
+                            <Text className="text-center font-agathobold text-2xl text-white leading-6">Continue with phone number</Text>
+                        </Pressable>
+                    </Link>
 
                     <View className='w-full flex-row justify-between items-center gap-3'>
                         <Pressable className='py-4 flex-grow flex justify-center rounded-2xl bg-white'>
