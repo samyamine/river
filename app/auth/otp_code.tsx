@@ -6,35 +6,26 @@ import { Keyboard, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, T
 const RESEND_TIMEOUT = 60;
 
 const fetchAPI = async (completePhoneNumber: string) => {
-    console.log(`CALL ${completePhoneNumber}`);
-
     const response = await fetch("http://51.83.79.164:8000/code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({phone_number: completePhoneNumber})
     });
 
-    return await response.json();
+    await response.json();
 };
 
 export default function VerificationCodePage() {
     const { phone_number } = useLocalSearchParams();
-    const [pin, setPin] = useState(["", "", "", ""]);
+    const [pin, setPin] = useState("");
     const [seconds, setSeconds] = useState(RESEND_TIMEOUT);
-    const [focusedIndex, setFocusedIndex] = useState(0);
-    const isPinComplete = pin.every((digit) => digit !== "");    
-
-    const inputs = [
-        useRef<TextInput>(null),
-        useRef<TextInput>(null),
-        useRef<TextInput>(null),
-        useRef<TextInput>(null),
-    ];
+    const hiddenInputRef = useRef<TextInput>(null);
+    const isPinComplete = pin.length === 4;
 
     // Keyboard appearance
     useEffect(() => {
         const timer = setTimeout(() => {
-            inputs[0].current?.focus();
+            hiddenInputRef.current?.focus();
         }, 550);
 
         return () => clearTimeout(timer);
@@ -56,30 +47,26 @@ export default function VerificationCodePage() {
         };
     }, [seconds]);
 
-    const handleChange = (text: string, index: number) => {
-        if (text && index < inputs.length - 1) {
-            inputs[index + 1].current?.focus();
-            setFocusedIndex(index + 1);
-        }
-        if (text && index === inputs.length - 1) {
-            Keyboard.dismiss();
-        }
-
-        const newPin = [...pin];
-        newPin[index] = text;
-        setPin(newPin);
-    };
 
     // Reset countdown
     const handleResend = async () => {
         setSeconds(RESEND_TIMEOUT);
-        const code = await fetchAPI(phone_number as string);
-        console.log(code);
+        await fetchAPI(phone_number as string);
     };
+
+
+    const handleChange = (text: string) => {
+        setPin(text.replace(/[^0-9]/g, "").slice(0, 4))
+
+        if (text.length === 4) {
+            hiddenInputRef.current?.blur();
+        }
+    };
+
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <TouchableWithoutFeedback onPress={() => hiddenInputRef.current?.blur()}>
                 <View className="w-full flex-1 p-5">
                     <View className='py-2 mb-5'>
                         <BackButton />
@@ -87,26 +74,25 @@ export default function VerificationCodePage() {
 
                     <View className="w-full pt-12 flex-grow justify-start gap-6">
                         <Text className="font-agathobold text-4xl">Enter your verification code</Text>
+
+                        <TextInput
+                            ref={hiddenInputRef}
+                            value={pin}
+                            onChangeText={handleChange}
+                            keyboardType="number-pad"
+                            maxLength={4}
+                            textContentType="oneTimeCode"
+                            autoComplete="sms-otp"
+                            style={{ position: "absolute", opacity: 0, height: 0 }}/>
+
+
                         <View className="flex-row gap-2 justify-center px-4">
-                            {pin.map((digit, index) => (
-                                <TextInput
-                                    key={index}
-                                    ref={inputs[index]}
-                                    value={digit}
-                                    onChangeText={(text) => handleChange(text, index)}
-                                    onKeyPress={({nativeEvent}) => {
-                                        if (nativeEvent.key == "Backspace" && !pin[index] && index > 0) {
-                                            inputs[index - 1].current?.focus();
-                                            const newPin = [...pin];
-                                            newPin[index - 1] = "";
-                                            setPin(newPin);
-                                            setFocusedIndex(index - 1);
-                                        }
-                                    }}
-                                    keyboardType="number-pad"
-                                    maxLength={1}
-                                    className={`w-16 h-24 text-center text-3xl border-2 ${focusedIndex === index ? "border-primaryColor" : "border-primaryGray-200"} rounded-xl`}
-                                />
+                            {[0, 1, 2, 3].map((index) => (
+                                <Pressable key={index} onPress={() => hiddenInputRef.current?.focus()}>
+                                    <View className={`w-16 h-24 justify-center items-center border-2 rounded-xl ${(pin.length === index) || (index === 3 && pin.length > 3) ? "border-primaryColor" : "border-primaryGray-200"}`}>
+                                        <Text className="text-3xl">{pin[index] ?? ""}</Text>
+                                    </View>
+                                </Pressable>
                             ))}
                         </View>
 

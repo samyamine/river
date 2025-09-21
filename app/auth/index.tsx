@@ -23,15 +23,13 @@ const countries: ICountry[] = Object.values(countriesDict).map(country => ({
 }));
 
 const fetchAPI = async (completePhoneNumber: string) => {
-    console.log(`CALL ${completePhoneNumber}`);
-
     const response = await fetch("http://51.83.79.164:8000/code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({phone_number: completePhoneNumber})
     });
 
-    return await response.json();
+    await response.json();
 };
 
 
@@ -53,10 +51,9 @@ export default function AuthPage() {
 
     const sendPhoneNumber = async (prefix: string, phoneNumber: string) => {
         setIsLoading(true);
-        const completePhoneNumber = `${prefix}${phoneNumber.replace(/\s+/g, "")}`;
-        const code = await fetchAPI(completePhoneNumber);
 
-        console.log(code);
+        const completePhoneNumber = `${prefix}${phoneNumber.replace(/\s+/g, "")}`;
+        await fetchAPI(completePhoneNumber);
 
         setIsLoading(false);
         router.push(`/auth/otp_code?phone_number=${encodeURIComponent(completePhoneNumber)}`);
