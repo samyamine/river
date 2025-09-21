@@ -44,10 +44,11 @@ export default function AuthPage() {
         setIsLoading(true);
 
         const completePhoneNumber = `${prefix}${phoneNumber.replace(/\s+/g, "")}`;
-        // await postAPI({
-        //     endpoint: "code",
-        //     body: {phone_number: completePhoneNumber},
-        // });
+
+        await postAPI({
+            endpoint: "code",
+            body: {phone_number: completePhoneNumber},
+        });
 
         setIsLoading(false);
         router.push(`/auth/otp_code?phone_number=${encodeURIComponent(completePhoneNumber)}`);
