@@ -8,6 +8,7 @@ import CountryFlag from "react-native-country-flag";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { white } from "@/assets/utils/colors";
 import LoadingCircle from "@/components/loading_circle";
+import { postAPI } from "@/assets/utils/functions";
 
 
 interface ICountry {
@@ -21,16 +22,6 @@ const countries: ICountry[] = Object.values(countriesDict).map(country => ({
     name: country.name,
     prefix: `+${country.prefix}`,
 }));
-
-const fetchAPI = async (completePhoneNumber: string) => {
-    const response = await fetch("http://51.83.79.164:8000/code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({phone_number: completePhoneNumber})
-    });
-
-    await response.json();
-};
 
 
 export default function AuthPage() {
@@ -53,7 +44,10 @@ export default function AuthPage() {
         setIsLoading(true);
 
         const completePhoneNumber = `${prefix}${phoneNumber.replace(/\s+/g, "")}`;
-        await fetchAPI(completePhoneNumber);
+        // await postAPI({
+        //     endpoint: "code",
+        //     body: {phone_number: completePhoneNumber},
+        // });
 
         setIsLoading(false);
         router.push(`/auth/otp_code?phone_number=${encodeURIComponent(completePhoneNumber)}`);
