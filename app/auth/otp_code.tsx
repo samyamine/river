@@ -1,15 +1,28 @@
 import BackButton from "@/components/back_button";
-import { Link } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 const RESEND_TIMEOUT = 60;
 
+const fetchAPI = async (completePhoneNumber: string) => {
+    console.log(`CALL ${completePhoneNumber}`);
+
+    const response = await fetch("http://51.83.79.164:8000/code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({phone_number: completePhoneNumber})
+    });
+
+    return await response.json();
+};
+
 export default function VerificationCodePage() {
+    const { phone_number } = useLocalSearchParams();
     const [pin, setPin] = useState(["", "", "", ""]);
     const [seconds, setSeconds] = useState(RESEND_TIMEOUT);
     const [focusedIndex, setFocusedIndex] = useState(0);
-    const isPinComplete = pin.every((digit) => digit !== "");
+    const isPinComplete = pin.every((digit) => digit !== "");    
 
     const inputs = [
         useRef<TextInput>(null),
@@ -43,11 +56,7 @@ export default function VerificationCodePage() {
         };
     }, [seconds]);
 
-    const handleChange = (text: string, index: number) => {        
-        const newPin = [...pin];
-        newPin[index] = text;
-        setPin(newPin);
-
+    const handleChange = (text: string, index: number) => {
         if (text && index < inputs.length - 1) {
             inputs[index + 1].current?.focus();
             setFocusedIndex(index + 1);
@@ -55,12 +64,17 @@ export default function VerificationCodePage() {
         if (text && index === inputs.length - 1) {
             Keyboard.dismiss();
         }
+
+        const newPin = [...pin];
+        newPin[index] = text;
+        setPin(newPin);
     };
 
     // Reset countdown
-    const handleResend = () => {
-        console.log("FIXME");
+    const handleResend = async () => {
         setSeconds(RESEND_TIMEOUT);
+        const code = await fetchAPI(phone_number as string);
+        console.log(code);
     };
 
     return (
@@ -96,7 +110,7 @@ export default function VerificationCodePage() {
                             ))}
                         </View>
 
-                        <Link href="/auth/sucess" asChild>
+                        <Link href="/auth/success" asChild>
                             <Pressable disabled={!isPinComplete} className={`w-full py-4 rounded-2xl ${isPinComplete ? "bg-primaryColor" : "bg-primaryGray-100"}`}>
                                 <Text className={`text-center font-agathobold text-2xl leading-6 ${isPinComplete ? "text-white" : "text-primaryGray-400"}`}>Continue</Text>
                             </Pressable>

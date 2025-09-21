@@ -1,9 +1,14 @@
 import countriesDict from "@/assets/utils/countries.json";
 import BackButton from '@/components/back_button';
-import { Link } from "expo-router";
+import { router } from "expo-router";
+import { fetch } from "expo/fetch";
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { white } from "@/assets/utils/colors";
+import LoadingCircle from "@/components/loading_circle";
+
 
 interface ICountry {
     iso: string,
@@ -17,10 +22,23 @@ const countries: ICountry[] = Object.values(countriesDict).map(country => ({
     prefix: `+${country.prefix}`,
 }));
 
+const fetchAPI = async (completePhoneNumber: string) => {
+    console.log(`CALL ${completePhoneNumber}`);
+
+    const response = await fetch("http://51.83.79.164:8000/code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({phone_number: completePhoneNumber})
+    });
+
+    return await response.json();
+};
+
 
 export default function AuthPage() {
     const inputRef = useRef<TextInput>(null);
     const [open, setOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [selectedCountry, setSelectedCountry] = useState(countries.find(country => country.iso === "fr") as ICountry);
     const isPhoneComplete = phoneNumber.replace(/[^0-9]/g, '').length >= 10;
@@ -32,6 +50,17 @@ export default function AuthPage() {
 
         return () => clearTimeout(timer);
     }, []);
+
+    const sendPhoneNumber = async (prefix: string, phoneNumber: string) => {
+        setIsLoading(true);
+        const completePhoneNumber = `${prefix}${phoneNumber.replace(/\s+/g, "")}`;
+        const code = await fetchAPI(completePhoneNumber);
+
+        console.log(code);
+
+        setIsLoading(false);
+        router.push(`/auth/otp_code?phone_number=${encodeURIComponent(completePhoneNumber)}`);
+    };
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}>
@@ -95,13 +124,18 @@ export default function AuthPage() {
                             </ScrollView>
                         )}
 
-                        <Link href="/auth/OTPcode" asChild>
-                            <Pressable 
-                                disabled={!isPhoneComplete} 
-                                className={`w-full py-4 rounded-2xl ${isPhoneComplete ? "bg-primaryColor" : "bg-primaryGray-100"}`}>
-                                <Text className={`text-center font-agathobold text-2xl leading-6 ${isPhoneComplete ? "text-white" : "text-primaryGray-400"}`}>Send verification code</Text>
-                            </Pressable>
-                        </Link>
+                        <Pressable
+                            disabled={!isPhoneComplete}
+                            onPress={() => sendPhoneNumber(selectedCountry.prefix, phoneNumber)} 
+                            className={`w-full ${isLoading ? "py-[12.5px]" : "py-4"} rounded-2xl ${isPhoneComplete ? "bg-primaryColor" : "bg-primaryGray-100"}`}>
+                                {isLoading ? (
+                                    <View className="flex justify-center items-center">
+                                        <LoadingCircle />
+                                    </View>
+                                ) : (
+                                    <Text className={`text-center font-agathobold text-2xl leading-6 ${isPhoneComplete ? "text-white" : "text-primaryGray-400"}`}>Send verification code</Text>
+                                )}
+                        </Pressable>
                     </View>
                 </View>
             </TouchableWithoutFeedback>

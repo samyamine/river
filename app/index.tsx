@@ -42,7 +42,7 @@ export default function IndexPage() {
                         </Pressable>
 
                         <Pressable className='py-4 flex-grow rounded-2xl bg-white'>
-                            <AntDesign name="apple1" size={24} color={primaryBlack} className='text-center' />
+                            <AntDesign name="apple" size={24} color={primaryBlack} className='text-center' />
                         </Pressable>
                     </View>
 
