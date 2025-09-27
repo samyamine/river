@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 import { Animated } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 const RESEND_TIMEOUT = 60;
@@ -105,7 +106,6 @@ export default function VerificationCodePage() {
 
     const verifyOTP = async () => {
         setIsLoading(true);
-        console.log(pin);
 
         const response = await postAPI({
             endpoint: "verify-otp",
@@ -119,12 +119,17 @@ export default function VerificationCodePage() {
             setIsLoading(false);
         }
         else {
-            // FIXME: Store session token locally
-            setIsLoading(false);
-            router.push(`/auth/success`);
-        }
+            try {
+                await AsyncStorage.setItem('session', response.token);
+                setIsLoading(false);
+                router.push(`/auth/success`);
+            } catch (e) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-        console.log(response);
+                setError("Unable to create a session");
+                setIsLoading(false);
+            }
+        }
     };
 
 
